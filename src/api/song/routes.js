@@ -1,10 +1,3 @@
-// const { handler } = require('@hapi/hapi/lib/cors');
-// const {addSongHandler,
-//     getAllSongsHandler,
-//     getSongByIdHandler,
-//     editSongByIdHandler,
-//     deleteSongByIdHandler,} = require('./handler');
-
 const routes = (handler) => [
     {
         method: 'POST',

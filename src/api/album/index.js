@@ -1,4 +1,3 @@
-const { server } = require("@hapi/hapi");
 const AlbumHandler = require("./handler");
 const routes = require("./routes");
 
