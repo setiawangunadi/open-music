@@ -11,14 +11,14 @@ class AlbumHandler{
         this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
     }
 
-    postAlbumHandler(request, h){
+    async postAlbumHandler(request, h){
         try {
             this._validator.validateAlbumPayload(request.payload);
             const { name = 'untitled', year } = request.payload;
 
             this._service.addAlbum({ name, year});
     
-            const albumId = this._service.addAlbum({ name, year });
+            const albumId = await this._service.addAlbum({ name, year });
     
             const response = h.response({
                 status: 'success',
@@ -49,11 +49,11 @@ class AlbumHandler{
         }
     }
 
-    getAlbumByIdHandler(request, h){
+    async getAlbumByIdHandler(request, h){
         try {
             this._validator.validateAlbumPayload(request.payload);
             const { album_id } = request.params;
-            const album = this._service.getAlbumById(album_id);
+            const album = await this._service.getAlbumById(album_id);
             const response = h.response({
                 status: 'success',
                 data: {
@@ -87,12 +87,13 @@ class AlbumHandler{
         }
     }
 
-    putAlbumByIdHandler(request, h){
+    async putAlbumByIdHandler(request, h){
         try {
             this._validator.validateAlbumPayload(request.payload);
+            const { name, year } = request.payload;
             const { album_id } = request.params;
 
-            this._service.editAlbumById(album_id, request.payload);
+            await this._service.editAlbumById(album_id, { name, year });
     
             const response = h.response({
                 status : 'success',
@@ -121,11 +122,10 @@ class AlbumHandler{
         }
     }
 
-    deleteAlbumByIdHandler(request, h){
+    async deleteAlbumByIdHandler(request, h){
         try {
-            this._validator.validateAlbumPayload(request.payload);
             const { album_id } = request.params;
-            this._service.deleteAlbumById(album_id);
+            await this._service.deleteAlbumById(album_id);
 
             const response = h.response({
                 status: 'success',
