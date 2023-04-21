@@ -1,8 +1,10 @@
+const ClientError = require('../../exceptions/ClientError');
 const albums = require('./albums');
 
 class AlbumHandler{
-    constructor(service){
+    constructor(service, validator){
         this._service = service;
+        this._validator = validator;
 
         this.postAlbumHandler = this.postAlbumHandler.bind(this);
         this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
@@ -12,6 +14,7 @@ class AlbumHandler{
 
     postAlbumHandler(request, h){
         try {
+            this._validator.validateAlbumPayload(request.payload);
             const { name = 'untitled', year } = request.payload;
 
             this._service.addAlbum({ name, year});
@@ -27,17 +30,29 @@ class AlbumHandler{
             response.code(201);
             return response;
         } catch (error) {
+            if (error instanceof ClientError){
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                });
+                response.code(error.statusCode);
+                return response;
+            }
+
+            //Server Error
             const response = h.response({
                 status: 'fail',
-                message: error.message,
+                message: 'Maaf, terjadi kegagalan pada server kami.',
             });
-            response.code(400);
+            response.code(500);
+            console.error(error);
             return response;
         }
     }
 
     getAlbumByIdHandler(request, h){
         try {
+            this._validator.validateAlbumPayload(request.payload);
             const { album_id } = request.params;
             const album = this._service.getAlbumById(album_id);
             const response = h.response({
@@ -53,17 +68,29 @@ class AlbumHandler{
             response.code(200);
             return response;
         } catch (error) {
+            if (error instanceof ClientError){
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                });
+                response.code(error.statusCode);
+                return response;
+            }
+
+            //Server Error
             const response = h.response({
                 status: 'fail',
-                message: error.message,
+                message: 'Maaf, terjadi kegagalan pada server kami.',
             });
-            response.code(404);
+            response.code(500);
+            console.error(error);
             return response;
         }
     }
 
     putAlbumByIdHandler(request, h){
         try {
+            this._validator.validateAlbumPayload(request.payload);
             const { album_id } = request.params;
 
             this._service.editAlbumById(album_id, request.payload);
@@ -75,17 +102,29 @@ class AlbumHandler{
             response.code(200);
             return response;
         } catch (error) {
+            if (error instanceof ClientError){
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                });
+                response.code(error.statusCode);
+                return response;
+            }
+
+            //Server Error
             const response = h.response({
                 status: 'fail',
-                message: error.message,
+                message: 'Maaf, terjadi kegagalan pada server kami.',
             });
-            response.code(404);
+            response.code(500);
+            console.error(error);
             return response;
         }
     }
 
     deleteAlbumByIdHandler(request, h){
         try {
+            this._validator.validateAlbumPayload(request.payload);
             const { album_id } = request.params;
             this._service.deleteAlbumById(album_id);
 
@@ -96,12 +135,23 @@ class AlbumHandler{
             response.code(200);
             return response;
         } catch (error) {
+            if (error instanceof ClientError){
+                const response = h.response({
+                    status: 'fail',
+                    message: error.message,
+                });
+                response.code(error.statusCode);
+                return response;
+            }
+
+            //Server Error
             const response = h.response({
                 status: 'fail',
-                message: error.message,
+                message: 'Maaf, terjadi kegagalan pada server kami.',
             });
-            response.code(404);
-            return response; 
+            response.code(500);
+            console.error(error);
+            return response;
         }
 
     }
