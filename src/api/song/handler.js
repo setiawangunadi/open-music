@@ -1,8 +1,9 @@
 const ClientError = require('../../exceptions/ClientError');
 
 class SongHandler{
-    constructor(service){
+    constructor(service, validator){
         this._service = service;
+        this._validator = validator;
 
         this.postSongHandler = this.postSongHandler.bind(this);
         this.getAllSongHandler = this.getAllSongHandler.bind(this);
@@ -11,13 +12,14 @@ class SongHandler{
         this.deleteSongByIdHandler = this.deleteSongByIdHandler.bind(this);
     }
 
-    postSongHandler(request, h){
+    async postSongHandler(request, h){
         try {
+            this._validator.validateSongPayload(request.payload);
             const { title = 'untitled', year, genre, performer, duration, albumId } = request.payload;
 
-            this._service.addSong({ title, year, genre, performer, duration, albumId});
+            // this._service.addSong({ title, year, genre, performer, duration, albumId});
 
-            const songId = this._service.addSong({ title, year, genre, performer, duration, albumId});
+            const songId = await this._service.addSong({ title, year, genre, performer, duration, albumId});
     
             const response = h.response({
                 status: 'success',
@@ -27,6 +29,33 @@ class SongHandler{
             });
             response.code(201);
             return response;
+            // const {
+            //     title = 'untitled',
+            //     year,
+            //     performer,
+            //     genre,
+            //     duration,
+            //     album_id
+            // } = request.payload;
+
+            // const songId = await this._service.addSong({
+            //     title,
+            //     year,
+            //     performer,
+            //     genre,
+            //     duration,
+            //     album_id
+            // });
+
+            // const response = h.response({
+            //     status: 'success',
+            //     message: 'Lagu berhasil ditambahkan',
+            //     data: {
+            //         songId,
+            //     },
+            // });
+            // response.code(201);
+            // return response;
         } catch (error) {
             if (error instanceof ClientError){
                 const response = h.response({
@@ -48,43 +77,44 @@ class SongHandler{
         }
     }
 
-    getAllSongHandler(h){
-        // try {
-        //     const songs = this._service.getSongs();
-
-        //     const response = h.response({
-        //         status: 'success',
-        //         data: {
-        //             songs,
-        //         }
-        //     });
-        //     response.code(200);
-        //     return response;
-        // } catch (error) {
-        //     const response = h.response({
-        //         status: 'fail',
-        //         message: error.message,
-        //     });
-        //     response.code(404);
-        //     return response;
-        // }
+    async getAllSongHandler(request, h){
         try {
-            const songs = this._service.getSongs();
-            return {
+            const songs = await this._service.getSongs();
+
+            const response = h.response({
                 status: 'success',
                 data: {
                     songs,
-                },
-            };
+                }
+            });
+            response.code(200);
+            return response;
         } catch (error) {
-            return error;
+            const response = h.response({
+                status: 'fail',
+                message: error.message,
+            });
+            response.code(404);
+            return response;
         }
+        // try {
+        //     const songs = await this._service.getSongs();
+        //     return {
+        //         status: 'success',
+        //         data: {
+        //             songs,
+        //         },
+        //     };
+        // } catch (error) {
+        //     return error;
+        // }
     }
 
-    getSongByIdHandler(request, h){
+    async getSongByIdHandler(request, h){
         try {
+            // this._validator.validateSongPayload(request.payload);
             const { song_id } = request.params;
-            const song = this._service.getSongById(song_id);
+            const song = await this._service.getSongById(song_id);
             const response = h.response({
                 status: 'success',
                 data: {
@@ -93,7 +123,8 @@ class SongHandler{
                         "title" : song.title,
                         "year" : song.year,
                         "performer" : song.performer,
-                        "genre" : song.duration,
+                        "genre" : song.genre,
+                        "duration" : song.duration,
                         "albumId" : song.albumId,
                     }
                 }
@@ -121,11 +152,13 @@ class SongHandler{
         }
     }
 
-    putSongByIdHadler(request, h){
+    async putSongByIdHadler(request, h){
         try {
+            this._validator.validateSongPayload(request.payload);
             const { song_id } = request.params;
+            const { title, year, genre, performer, duration, albumId } = request.payload;
 
-            this._service.editSongById(song_id, request.payload);
+            await this._service.editSongById(song_id, { title, year, genre, performer, duration, albumId });
 
             const response = h.response({
                 status : 'success',
@@ -154,10 +187,10 @@ class SongHandler{
         }
     }
 
-    deleteSongByIdHandler(request, h){
+    async deleteSongByIdHandler(request, h){
         try {
             const { song_id } = request.params;
-            this._service.deleteSongById(song_id);
+            await this._service.deleteSongById(song_id);
 
             const response = h.response({
                 status: 'success',

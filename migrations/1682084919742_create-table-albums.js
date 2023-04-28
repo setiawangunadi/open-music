@@ -19,11 +19,11 @@ exports.up = pgm => {
         created_at: {
             type: 'TEXT',
             notNull: true,
-          },
-          updated_at: {
+        },
+        updated_at: {
             type: 'TEXT',
             notNull: true,
-          },
+        },
     });
 };
 
